@@ -1,0 +1,30 @@
+{
+  "Comment": "A state machine that triggers two Glue jobs.",
+  "StartAt": "TriggerMysqlExtractionJob",
+  "States": {
+    "TriggerMysqlExtractionJob": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "extract_raw_data",
+        "Arguments": {
+          "--table_name": "order_items",
+          "--file_format": "parquet"
+        }
+      },
+      "Next": "TriggerRedshiftIngestJob"
+    },
+    "TriggerRedshiftIngestJob": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "load_redshift",
+        "Arguments": {
+          "--table_name": "order_items",
+          "--file_format": "parquet"
+        }
+      },
+      "End": true
+    }
+  }
+}
